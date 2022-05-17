@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JLabel;
@@ -30,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
+
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
@@ -74,6 +77,7 @@ public class soldItems extends JFrame implements sumInterface{
 	private JTextField gaskets_material;
 	
 	private JButton btnDelete;
+	private JButton menu;
 	private JButton addBtn;
 	private JButton btnSearch;
 	private JButton update_btn;
@@ -89,10 +93,10 @@ public class soldItems extends JFrame implements sumInterface{
 	private static soldItems frame;
 	private JTextField h_plt_count;
 	private JTextField l_plt_count;
-	private JTextField t_EPDM;
+	private JTextField t_EPDM_H;
 	private JTextField t_NBR_H;
 	private JLabel lblNewLabel_2;
-	private JLabel t_EPDM_H;
+	private JLabel t1;
 	private JLabel lblNewLabel_4;
 	private JTextField t_EPDM_L;
 	private JTextField t_NBR_L;
@@ -105,6 +109,7 @@ public class soldItems extends JFrame implements sumInterface{
 				try {
 					 frame = new soldItems();
 					frame.setVisible(true);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -118,6 +123,7 @@ public class soldItems extends JFrame implements sumInterface{
 	 * @throws ParseException 
 	 */
 	public soldItems() throws IOException, ParseException {
+		setBounds(new Rectangle(500, 700, 300, 1000));
 		setSize(new Dimension(50, 50));
 		setTitle("PHE Stock");
 		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Eli\\docs\\Desktop\\my docs\\Project Pics\\PHE.jfif"));
@@ -146,14 +152,16 @@ public class soldItems extends JFrame implements sumInterface{
 				}
 			}
 		});
+	    
 	    update_btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					
 					UpdateTableOnFields();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
+				} 
 				exportToCSV(table,
 				        "eli-soldItems.csv");
 			}
@@ -211,10 +219,22 @@ public int [] getSum() {
 			org.apache.commons.csv.CSVParser csvParser= CSVFormat.DEFAULT.parse(inputStreamReader);
 	       List<CSVRecord> records = csvParser.getRecords();
 	       int i=0;
+	       DefaultTableModel tm=(DefaultTableModel)table.getModel();
+	       
 	       for(CSVRecord r: records) {
 	    	   if(i>0) {
-	    		   sumH+=Integer.parseInt(r.get(5));
-	    	       sumL+=Integer.parseInt(r.get(6));
+	    		   Boolean b=false;
+	    			Pattern p= Pattern.compile("\\d+$");
+	    			String [] rec= toArray(r);
+	    			
+	    			Boolean b1=p.matcher(rec[5]).matches();
+	    			Boolean b2=p.matcher(rec[6]).matches();
+	    			System.out.println("the record is"+rec[6]+" "+b1);
+	    			if(b1&&b2)
+	    			 {	
+	    		       System.out.println("the record is"+rec[6]+" "+p.matcher(rec[5]).matches());
+	    		       sumH+=Integer.parseInt(r.get(5));
+	    	           sumL+=Integer.parseInt(r.get(6));
 	    	       if(r.get(8).equals("EPDM")) {
 	    	       sumEH+=(Integer.parseInt(r.get(5))-1);
 	    	       sumEL+=(Integer.parseInt(r.get(6))-1);
@@ -222,17 +242,17 @@ public int [] getSum() {
 	    	       if(r.get(8).equals("NBR")) {
 	    	       sumNH+=(Integer.parseInt(r.get(5))-1);
 	    	       sumNL+=(Integer.parseInt(r.get(6))-1);
-	    	       }
+	              }
+	    			}
 	    	   }
 	    	i++;
 	       }
 	       h_plt_count.setText(Integer.toString(sumH));
 	       l_plt_count.setText(Integer.toString(sumL));
-	      t_EPDM_H.setText(Integer.toString(sumEH));
 	       t_NBR_H.setText(Integer.toString(sumNH));
-	       t_EPDM_L.setText(Integer.toString(sumEL));
+	       t_EPDM_H.setText(Integer.toString(sumEH));
 	       t_NBR_L.setText(Integer.toString(sumNL));
-	      
+	       t_EPDM_L.setText(Integer.toString(sumEL));
 	      
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -241,7 +261,7 @@ public int [] getSum() {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 int [] arr= {sumH,sumL,sumNH,sumEH,sumNH,sumEH};
+		 int [] arr= {sumH,sumL,sumNH,sumEH,sumNL,sumEL};
 	       return arr;
 
 //	        int sum = 0;
@@ -256,6 +276,26 @@ public int [] getSum() {
 //	        h_plt_count.setText(Integer.toString(sum));
 		
    }
+public static String[] toArray(CSVRecord rec) {
+    String[] arr = new String[rec.size()];
+    int i = 0;
+    for (String str : rec) {
+        arr[i++] = str;
+    }
+    return arr;
+}
+//public Boolean validate1() {
+//	Boolean b=false;
+//	Pattern p= Pattern.compile("\\d+$");
+//	if(p.matcher(po.getText()).matches())
+//	if(p.matcher(h_plt_count.getText()).matches())
+//	if(p.matcher(l_plt_count.getText()).matches())
+//	if(p.matcher(t_NBR_H.getText()).matches())
+//	if(p.matcher(t_EPDM_L.getText()).matches()) {
+//		b=true;
+//	}
+//	return b;
+//}
 	protected void search(String name) throws IOException {
 		TableRowSorter<DefaultTableModel> tr=new TableRowSorter<DefaultTableModel>(dtm);
 		table.setRowSorter(tr);
@@ -339,7 +379,7 @@ public int [] getSum() {
 	    prog_name.setText(prog_name_Sel);
 	    num_PHE.setText(Num_PHE_Sel);
 	    if(((DefaultComboBoxModel)comboBox.getModel()).getIndexOf(mod_PHE_Sel)>-1)
-	    comboBox.setSelectedItem(mod_PHE_Sel);   
+	       comboBox.setSelectedItem(mod_PHE_Sel);   
 	    h_plates.setText(h_platesSel);
 	    l_plates.setText(l_platesSel);
 	   plates_material.setText(material_p_sel);
@@ -350,9 +390,27 @@ public int [] getSum() {
 	public void setButtons() {
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		btnDelete.setBounds(529, 200, 132, 26);
+		btnDelete.setBounds(529, 199, 132, 26);
 		contentPane.add(btnDelete);
-		
+		menu = new JButton("Menu");
+		menu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+	            dispose();
+	           try {
+				crudApp ca= new crudApp();
+				ca.frmEliko.setVisible(true);
+			} catch (IOException | ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+				
+			}
+		});
+		menu.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		menu.setBounds(50, 20, 132, 26);
+		contentPane.add(menu);
 		 addBtn = new JButton("Add");
 		
 		addBtn.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -491,10 +549,11 @@ public int [] getSum() {
 		table.setBounds(57, 304, 850, 256);
 		table.setBackground(Color.green);
 		dtm=new DefaultTableModel();
-		Object[] colomn= {"Date","Customer Name","Project Name","PHE Number","Model","H Plates","L Plates","Plates Material","Plates Material"};
+		Object[] colomn= {"Date","Customer Name","Project Name","PHE Number","Model","H Plates","L Plates","Plates Material","Gaskets Material"};
 		 row= new Object[9];
 		dtm.setColumnIdentifiers(colomn);
 		table.setModel(dtm);
+		JTableHeader jth=table.getTableHeader();
 		
 		scrollPane.setViewportView(table);
 	
@@ -523,16 +582,16 @@ public int [] getSum() {
 		l_plt_count.setBounds(866, 95, 96, 19);
 		contentPane.add(l_plt_count);
 		
-		t_EPDM = new JTextField();
-		t_EPDM.setText("0");
-		t_EPDM.setColumns(10);
-		t_EPDM.setBounds(866, 128, 96, 19);
-		contentPane.add(t_EPDM);
+		t_EPDM_H = new JTextField();
+		t_EPDM_H.setText("0");
+		t_EPDM_H.setColumns(10);
+		t_EPDM_H.setBounds(866, 128, 96, 19);
+		contentPane.add(t_EPDM_H);
 		
 		t_NBR_H = new JTextField();
 		t_NBR_H.setText("0");
 		t_NBR_H.setColumns(10);
-		t_NBR_H.setBounds(866, 166, 96, 19);
+		t_NBR_H.setBounds(866, 168, 96, 19);
 		contentPane.add(t_NBR_H);
 		
 		lblNewLabel_2 = new JLabel("Total L plates");
@@ -540,10 +599,10 @@ public int [] getSum() {
 		lblNewLabel_2.setBounds(703, 81, 101, 43);
 		contentPane.add(lblNewLabel_2);
 		
-		t_EPDM_H = new JLabel("Total EPDM gaskets-H");
-		t_EPDM_H.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		t_EPDM_H.setBounds(703, 117, 165, 43);
-		contentPane.add(t_EPDM_H);
+		t1 = new JLabel("Total EPDM gaskets-H");
+		t1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		t1.setBounds(703, 117, 165, 43);
+		contentPane.add(t1);
 		
 		lblNewLabel_4 = new JLabel(" Total NBR gaskets-H");
 		lblNewLabel_4.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -571,6 +630,11 @@ public int [] getSum() {
 		lblNewLabel_4_1.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		lblNewLabel_4_1.setBounds(699, 232, 165, 43);
 		contentPane.add(lblNewLabel_4_1);
+		
+		JLabel lblNewLabel_3 = new JLabel("Sold Items");
+		lblNewLabel_3.setFont(new Font("Arial", Font.BOLD, 26));
+		lblNewLabel_3.setBounds(336, 10, 155, 30);
+		contentPane.add(lblNewLabel_3);
 	}
 	public void addItem() {
 		DefaultTableModel tm=(DefaultTableModel)table.getModel();

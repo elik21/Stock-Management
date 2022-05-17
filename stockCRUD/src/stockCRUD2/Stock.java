@@ -82,6 +82,7 @@ public class Stock {
     private JLabel lblNewLabel;
     private JLabel lblNewLabel_4;
     private JLabel lblNewLabel_6;
+    private JLabel lblNewLabel_7;
 	/**
 	 * Launch the application.
 	 */
@@ -103,8 +104,9 @@ public class Stock {
 	/**
 	 * Create the application.
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	public Stock() throws IOException {
+	public Stock() throws IOException, ParseException {
 		initialize();
 		
 	}
@@ -112,8 +114,9 @@ public class Stock {
 	/**
 	 * Initialize the contents of the frame.
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	private void initialize() throws IOException {
+	private void initialize() throws IOException, ParseException {
 		frame = new JFrame();
 		JOptionPane a= new JOptionPane();
 		frame.setBounds(100, 100, 902, 641);
@@ -134,6 +137,9 @@ public class Stock {
 				} catch (ParseException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -147,6 +153,9 @@ public class Stock {
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -155,10 +164,15 @@ public class Stock {
 			public void actionPerformed(ActionEvent e) {
 				DefaultTableModel tm=(DefaultTableModel)table.getModel();
 				tm.removeRow(table.getSelectedRow());
-				getSum1();
+				try {
+					getSum1();
+				} catch (IOException | ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
-		table.setName("eli");
+		
 		
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -206,7 +220,12 @@ public class Stock {
 						JOptionPane.showMessageDialog(frame, "please enter Number!");
 					}
 				}
-				getSum1();
+				try {
+					getSum1();
+				} catch (IOException | ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -214,9 +233,7 @@ public class Stock {
 		save();
 		getSum1();
 }
-	
-	
-	private Boolean validate() {
+private Boolean validate() {
 		Boolean b=false;
 		Pattern p= Pattern.compile("\\d+$");
 		if(p.matcher(po.getText()).matches())
@@ -228,7 +245,6 @@ public class Stock {
 		}
 		return b;
 	}
-
 private void setTexts() {
 		
 		NBR_gaskets = new JTextField();
@@ -291,13 +307,9 @@ private void setTexts() {
 protected void search(String name) throws IOException {
 	TableRowSorter<DefaultTableModel> tr=new TableRowSorter<DefaultTableModel>(dtm);
 	table.setRowSorter(tr);
-	///customer_name.setText("e");
 	tr.setRowFilter(RowFilter.regexFilter("^"+name));
-	//table.addRowSelectionInterval(0, 0);
 }
-
 private void setButtons() {
-
 			btnDel = new JButton("Delete");
 			btnDel.setBounds(10, 401, 112, 23);
 			frame.getContentPane().add(btnDel);
@@ -319,7 +331,6 @@ private void setButtons() {
 			btnClear.setBounds(10, 427, 112, 25);
 			frame.getContentPane().add(btnClear);
 		}
-
 protected void clearfields() {
 		// TODO Auto-generated method stub
 		model.setValue(new Date("01/01/70"));
@@ -334,7 +345,6 @@ public void dpicker() {
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
-		//JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
 		 model = new UtilDateModel();
 	    model.setDate(2014,03,25);
 	   
@@ -389,17 +399,40 @@ public void dpicker() {
 		lblNewLabel_6.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		lblNewLabel_6.setBounds(384, 521, 143, 34);
 		frame.getContentPane().add(lblNewLabel_6);
+		
+		JButton btnNewButton = new JButton("Menu");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				crudApp ca;
+				try {
+					ca = new crudApp();
+					ca.frmEliko.setVisible(true);
+					frame.dispose();
+				} catch (IOException | ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+		});
+		btnNewButton.setBounds(10, 8, 85, 21);
+		frame.getContentPane().add(btnNewButton);
+		
+		lblNewLabel_7 = new JLabel("Stock");
+		lblNewLabel_7.setFont(new Font("Arial", Font.BOLD, 26));
+		lblNewLabel_7.setBounds(103, 39, 96, 30);
+		frame.getContentPane().add(lblNewLabel_7);
 	}
 private void setTable() {
 		// TODO Auto-generated method stub
         JScrollPane scrollPane = new JScrollPane();
-		
+       
 		scrollPane.setBackground(Color.LIGHT_GRAY);
 		scrollPane.setBounds(293, 10, 566, 414);
 		frame.getContentPane().add(scrollPane);
 		
 		table = new JTable();
-		
+		table.setName("eli");
 		table.setBackground(Color.green);
 		dtm=new DefaultTableModel();
 		Object[] colomn= {"Date","H plates","L plates","NBR gaskets","P.O","EPDM gaskets"};
@@ -408,20 +441,11 @@ private void setTable() {
 		table.setModel(dtm);
 		scrollPane.setViewportView(table);
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-		//table.setVisible(false);
-
-//		dtm.addRow(row);
-//		dtm.addRow(row);
-//		dtm.addRow(row);
-		//dtm.removeRow(1);
+		
 	}
-	
 @SuppressWarnings("unchecked")
 private void save() throws IOException {
-	//CSVReader reader = new CSVReader(new FileReader("eli.csv")); 
-	//List list = reader.readAll();
-	//System.out.println(colomn[0]);
-	// table = new JTable(readCsv( "C:\\Users\\Eli\\docs\\Desktop\\Java\\eli.csv"),colomn);
+
 	 File csv_file=new File("eli.csv");
 	InputStreamReader inputStreamReader=new InputStreamReader(new FileInputStream(csv_file));
 
@@ -467,8 +491,7 @@ static Object[][] readCsv(String file) throws IOException {
     }
     return lines.toArray(new Object[lines.size()][]);
 }
-
-private void UpdateTableOnTable() throws ParseException {
+private void UpdateTableOnTable() throws ParseException, IOException {
     	
 				DefaultTableModel tm=(DefaultTableModel)table.getModel();
 				String dateSel=tm.getValueAt(table.getSelectedRow(), 0).toString();
@@ -534,17 +557,38 @@ public static void exportToCSV(JTable table,
            System.out.println("Error "+e);
         }
     }
-
-public void getSum1() {
+public void getSum1() throws IOException, ParseException {
 	// TODO Auto-generated method stub
 	  
     int sumH = 0;
     int sumL = 0;
     int sumNBR = 0;
     int sumEPDM = 0;
+    int sumH1 = 0;
+    int sumL1 = 0;
+    int sumNBR1 = 0;
+    int sumEPDM1 = 0;
    String PATTERN = "\\d+$";
     Pattern pattern = Pattern.compile(PATTERN);
+    Date d= new SimpleDateFormat("dd/MM/yyyy").parse((String) table.getValueAt(0, 0));
     for(int i =0;i<table.getRowCount();i++){
+    	
+//    	 Date d1= new SimpleDateFormat("dd/MM/yyyy").parse((String) table.getValueAt(i, 0));
+//    	 int year =0;
+//    	 if(d1.getMonth()+1>=1&&d1.getDay()>=1){
+//    		 for(int j=0;j<i;j++) {
+//    			 if((pattern.matcher(table.getValueAt(j, 1).toString()).matches())&&!(table.getValueAt(i, 1).toString().equals("")))
+//    			        sumH1 = sumH1 +Integer.parseInt(table.getValueAt(i, 1).toString());
+//    			    	if(pattern.matcher(table.getValueAt(j, 2).toString()).matches()&&!table.getValueAt(i, 2).toString().equals(""))
+//    			            sumL1= sumL1 +Integer.parseInt(table.getValueAt(i, 2).toString());
+//    			    	if(pattern.matcher(table.getValueAt(j, 3).toString()).matches()&&!table.getValueAt(i, 3).toString().equals(""))
+//    			            sumNBR1 = sumNBR1 +Integer.parseInt(table.getValueAt(i, 3).toString());
+//    			    	if(pattern.matcher(table.getValueAt(j, 5).toString()).matches()&&!table.getValueAt(i, 5).toString().equals(""))
+//    			            sumEPDM1 = sumEPDM1 +Integer.parseInt(table.getValueAt(i, 5).toString());
+//    		 }
+//    		year=d1.getYear();
+//    	 }
+    	
     	if((pattern.matcher(table.getValueAt(i, 1).toString()).matches())&&!(table.getValueAt(i, 1).toString().equals("")))
         sumH = sumH +Integer.parseInt(table.getValueAt(i, 1).toString());
     	if(pattern.matcher(table.getValueAt(i, 2).toString()).matches()&&!table.getValueAt(i, 2).toString().equals(""))
@@ -553,14 +597,25 @@ public void getSum1() {
             sumNBR = sumNBR +Integer.parseInt(table.getValueAt(i, 3).toString());
     	if(pattern.matcher(table.getValueAt(i, 5).toString()).matches()&&!table.getValueAt(i, 5).toString().equals(""))
             sumEPDM = sumEPDM +Integer.parseInt(table.getValueAt(i, 5).toString());
-        //here i is the row wise iteration and 2 is the column number of my 
+    	
+     
+    		 
     	
     	
     }
-   
-    total_h_plts.setText(Integer.toString(sumH));
-    total_l_plts.setText(Integer.toString(sumL));
-    NBR_total.setText(Integer.toString(sumNBR));
-    EPDM_total.setText(Integer.toString(sumEPDM));
+   soldItems sItems= new soldItems();
+   int [] arr=sItems.getSum();
+   if(arr[0]<sumH&&arr[1]<sumL&&arr[2]+arr[4]<sumNBR&&arr[3]+arr[5]<sumEPDM) {
+    total_h_plts.setText(Integer.toString(sumH-arr[0]));
+    total_l_plts.setText(Integer.toString(sumL-arr[1]));
+    NBR_total.setText(Integer.toString(sumNBR-arr[2]-arr[4]));
+    EPDM_total.setText(Integer.toString(sumEPDM-arr[3]-arr[5]));
+   }
+   else {
+	   total_h_plts.setText(Integer.toString(sumH));
+	    total_l_plts.setText(Integer.toString(sumL));
+	    NBR_total.setText(Integer.toString(sumNBR));
+	    EPDM_total.setText(Integer.toString(sumEPDM));
+   }
 }
 }
